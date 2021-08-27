@@ -1,15 +1,15 @@
-import {Express} from 'express'
 import * as passport from 'passport'
 import * as passportJwt from 'passport-jwt'
 import * as passportLocal from 'passport-local'
 import * as bcrypt from 'bcrypt'
 import * as model from './Model'
+import * as jwt from 'jsonwebtoken'
 
 const ExtractJwt = passportJwt.ExtractJwt
 const LocalStrategy = passportLocal.Strategy
 const JwtStrategy = passportJwt.Strategy
 
-export default (app:Express)=>{
+export default (app)=>{
     passport.use(new LocalStrategy({
         usernameField: 'email',
         passwordField: 'password'
@@ -41,4 +41,26 @@ export default (app:Express)=>{
             return cb(err);
         });
     }))
+
+    app.post('/login', (req,res, next)=>{
+        passport.authenticate('local', {session:false}, (err, user, info)=>{
+            if(err || !user || user.error){
+                console.log(err)
+                return res.status(400).json({
+                    message: info ? info.message: "Login failed",
+                    user
+                })
+            }
+
+            req.login(user, {session:false}, (err)=>{
+                if(err) res.send(err)
+
+                const token = jwt.sign(
+                    user, 
+                    process.env.JWT_SECRET, 
+                    {expiresIn: '1h'})
+                return res.json({user, token})
+            })
+        })(req,res, next)
+    })
 }
