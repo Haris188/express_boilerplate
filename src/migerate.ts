@@ -25,32 +25,12 @@ pg.raw('CREATE DATABASE efficient').then(async function () {
 
     await pg.schema.createTable('users', function (table) {
         table.increments('id')
-        table.string('first_name')
-        table.string('last_name')
-        table.string('email')
-        table.string('password')
+        table.string('first_name').notNullable()
+        table.string('last_name').notNullable()
+        table.string('email').notNullable()
+        table.string('password').notNullable()
     }).then((value)=>{
         console.log('-users created')
-    })
-
-    await pg.schema.createTable('tasks', function (table){
-        table.increments('id')
-        table.timestamp('start_time')
-        table.timestamp('end_time')
-        table.string('name')
-        table.string('description')
-        table.integer('user_id')
-    }).then((value)=>{
-        console.log('-tasks created')
-    })
-
-    await pg.schema.createTable('intervals', function (table){
-        table.increments('id')
-        table.integer('task_id')
-        table.timestamp('start_time')
-        table.timestamp('end_time')
-    }).then((value)=>{
-        console.log('-intervals created')
     })
 
     await pg.destroy()
